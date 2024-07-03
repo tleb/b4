@@ -1309,8 +1309,13 @@ def make_msgid_tpt(change_id: str, revision: str, domain: Optional[str] = None) 
         # If someone uses b4 in year 10000, look me up.
         stablepart = '%s-%s' % (datetime.date.today().strftime('%Y%m%d'), chunks[1])
 
-    # Message-IDs must not be predictable to avoid stuffing attacks
-    randompart = uuid.uuid4().hex[:12]
+    try:
+        # Allow forging the randompart of Message-IDs
+        randompart = os.environ['B4_MESSAGEID_RANDOMPART']
+    except KeyError:
+        # Message-IDs must not be predictable to avoid stuffing attacks
+        randompart = uuid.uuid4().hex[:12]
+
     msgid_tpt = f'<{stablepart}-v{revision}-%s-{randompart}@{domain}>'
     return msgid_tpt
 
